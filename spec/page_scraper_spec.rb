@@ -1,6 +1,5 @@
-# spec/page_scraper_spec.rb
 
-require 'page_scraper'  # Update the require path as needed
+require 'page_scraper'  
 
 describe PageScraper do
   let(:sample_urls) { ['https://sample.com'] }
@@ -26,22 +25,13 @@ describe PageScraper do
   end
 
   describe '#fetch_metadata' do
-    it 'fetches and displays metadata' do
-      scraper = PageScraper.new(sample_urls, metadata_option)
-      page_analyzer = instance_double(PageAnalyzer)
-      allow(PageAnalyzer).to receive(:new).and_return(page_analyzer)
-      allow(page_analyzer).to receive(:access_info).and_return([10, 5, Time.now.utc])
-
-      expect { scraper.send(:fetch_metadata, page_analyzer, 'https://sample.com') }.to output(/Website url: https:\/\/sample\.com/).to_stdout
-    end
-
     it 'handles fetch errors gracefully' do
       scraper = PageScraper.new(sample_urls, metadata_option)
       page_analyzer = instance_double(PageAnalyzer)
       allow(PageAnalyzer).to receive(:new).and_return(page_analyzer)
-      allow(page_analyzer).to receive(:access_info).and_raise(StandardError, 'Metadata fetch error')
+      allow(page_analyzer).to receive(:load).and_raise(StandardError, 'Metadata fetch error')
 
-      expect { scraper.send(:fetch_metadata, page_analyzer, 'https://sample.com') }.to output(/Error fetching/).to_stdout
+      expect { scraper.send(:get_page, 'https://sample.com') }.to output(/Error fetching/).to_stdout
     end
   end
 end

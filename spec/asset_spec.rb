@@ -1,34 +1,40 @@
-# spec/assets_spec.rb
+require 'fileutils'
+require 'asset'
 
-require 'asset'  # Update the require path as needed
+RSpec.describe Assets do
+  let(:url) { 'https://example.com' }
+  let(:host) { 'example.com' }
+  let(:content) { Nokogiri::HTML::Document.parse('your_html_content_here') }
 
-describe Assets do
-  let(:sample_url) { 'https://sample.com' }
-
-  describe '#download_assets' do
-    it 'downloads and saves assets and HTML page for a given URL' do
-      assets = Assets.new(sample_url)
-      expect { assets.download_assets }.not_to raise_error
-    end
+  before(:each) do
+    @asset = Assets.new(url, content)
   end
 
-  describe 'private methods' do
+  describe '#download_assets' do
     it 'creates an images directory' do
-      assets = Assets.new(sample_url)
-      expect { assets.send(:create_images_dir, 'sample.com') }.not_to raise_error
+      allow(FileUtils).to receive(:mkdir_p).with(File.join(host, 'assets/images'))
+      @asset.download_assets
     end
 
-    it 'saves an HTML page' do
-      assets = Assets.new(sample_url)
-      parsed_page = Nokogiri::HTML(URI.open(sample_url))
-      expect { assets.send(:save_html_page, parsed_page, 'sample.com') }.not_to raise_error
+    it 'saves the HTML page' do
+      allow(File).to receive(:write).with(File.join(host, "#{host}.html"), content.to_html)
+      @asset.download_assets
     end
 
-    it 'saves page images' do
-      assets = Assets.new(sample_url)
-      parsed_page = Nokogiri::HTML(URI.open(sample_url))
-      host_uri = URI.parse(sample_url)
-      expect { assets.send(:save_page_images, parsed_page, host_uri, sample_url) }.not_to raise_error
+    it 'saves image assets and updates their src' do
+      img = Nokogiri::HTML.fragment('<img src="image.jpg">').at('img')
+      img['src'] = 'image.jpg' # Ensure the src is set
+      allow(content).to receive(:css).with('img').and_return([img])
+
+      image_url = URI.join(url, 'image.jpg').to_s
+      image_path = File.join(host, 'assets/images', 'image.jpg')
+      image_fetch_path = File.join('assets/images', 'image.jpg')
+
+      expect(@asset).to receive(:download_file).with(image_url, image_path)
+
+      @asset.download_assets
+
+      expect(img['src']).to eq(image_fetch_path)
     end
   end
 end

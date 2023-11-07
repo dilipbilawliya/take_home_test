@@ -1,5 +1,6 @@
 
 require 'page_analyzer'  
+require 'asset'
 
 describe PageAnalyzer do
   let(:sample_url) { 'https://sample.com' }
@@ -28,13 +29,11 @@ describe PageAnalyzer do
 
     it 'returns the count of links on the page' do
       analyzer = PageAnalyzer.new(sample_url)
-      analyzer.load
       expect(analyzer.send(:link_count)).to be >= 0
     end
 
     it 'returns the count of images on the page' do
       analyzer = PageAnalyzer.new(sample_url)
-      analyzer.load
       expect(analyzer.send(:image_count)).to be >= 0
     end
 
