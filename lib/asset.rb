@@ -11,11 +11,10 @@ class Assets
   end
 
   def download_assets
-    parsed_page = content
     host_uri = URI.parse(url)
     create_images_dir(host_uri.host)
-    save_page_images(parsed_page, host_uri, url)
-    save_html_page(parsed_page, host_uri.host)
+    save_page_images(host_uri, content)
+    save_html_page(content, host_uri.host)
   end
 
   private
@@ -29,17 +28,21 @@ class Assets
     File.write(File.join(host, "#{host}.html"), parsed_page.to_html)
   end
 
-  def save_page_images(parsed_page, host_uri, url)
+  def save_page_images(host_uri, parsed_page)
     parsed_page.css('img').each do |image|
       src = image['src']
       next if src.nil? || src.empty?
-      image_url = URI.join(url, src).to_s
-      image_path = File.join(host_uri.host, 'assets/images', File.basename(src))
-      image_fetch_path = File.join('assets/images', File.basename(src))
-
-      download_file(image_url, image_path)
-      image['src'] = image_fetch_path
+      set_image_url(host_uri, src,image)
     end
+  end
+
+  def set_image_url(host_uri, src, image)
+    image_url = URI.join(url, src).to_s
+    image_path = File.join(host_uri.host, 'assets/images', File.basename(src))
+    image_fetch_path = File.join('assets/images', File.basename(src))
+    download_file(image_url, image_path)
+
+    image['src'] = image_fetch_path
   end
 
   def download_file(url, path)

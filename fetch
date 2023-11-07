@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-# encod
+# encoding: UTF-8
 require './lib/page_scraper'
 
 class Fetch

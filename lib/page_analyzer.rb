@@ -2,6 +2,7 @@ require 'open-uri'
 require 'nokogiri'
 
 class PageAnalyzer
+  attr_reader :doc, :url
 
   def initialize(url)
     @url = url
@@ -9,6 +10,7 @@ class PageAnalyzer
 
   def load
     @doc = Nokogiri::HTML(URI.open(@url))
+    get_assets(@url, @doc)
   end
 
   def access_info
@@ -36,5 +38,9 @@ class PageAnalyzer
 
   def last_accessed_time
     accessed_time ||= Time.now.utc
+  end
+
+  def get_assets(url, content)
+    Assets.new(url, content).download_assets
   end
 end
