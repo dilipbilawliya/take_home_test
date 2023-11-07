@@ -1,9 +1,9 @@
 
-require 'page_analyzer'
+require 'page_analyzer'  
 
 describe PageAnalyzer do
-  let(:sample_url) { 'https://example.com' }
-
+  let(:sample_url) { 'https://sample.com' }
+  
   describe '#load' do
     it 'loads the HTML content of the page' do
       analyzer = PageAnalyzer.new(sample_url)
@@ -11,45 +11,36 @@ describe PageAnalyzer do
     end
   end
 
-  describe '#fetch_page' do
-    it 'fetches the HTML content of the page' do
+  describe '#access_info' do
+    it 'returns an array with link count, image count, and last accessed time' do
       analyzer = PageAnalyzer.new(sample_url)
-      expect { analyzer.fetch_page }.not_to raise_error
+      expect(analyzer.access_info).to be_an_instance_of(Array)
+      expect(analyzer.access_info.size).to eq(3)
     end
   end
 
-  describe '#link_count' do
+  describe 'private methods' do
+    it 'formats time correctly' do
+      analyzer = PageAnalyzer.new(sample_url)
+      time = Time.utc(2023, 11, 8, 12, 0)
+      expect(analyzer.send(:formatted_time, time)).to eq('Wed Nov 08 2023 12:00 UTC')
+    end
+
     it 'returns the count of links on the page' do
       analyzer = PageAnalyzer.new(sample_url)
       analyzer.load
-      expect(analyzer.link_count).to be >= 0
+      expect(analyzer.send(:link_count)).to be >= 0
     end
-  end
 
-  describe '#image_count' do
     it 'returns the count of images on the page' do
       analyzer = PageAnalyzer.new(sample_url)
       analyzer.load
-      expect(analyzer.image_count).to be >= 0
+      expect(analyzer.send(:image_count)).to be >= 0
     end
-  end
 
-  describe '#last_accessed_time' do
     it 'returns the last accessed time as a Time object' do
       analyzer = PageAnalyzer.new(sample_url)
-      expect(analyzer.last_accessed_time).to be_a(Time)
-    end
-  end
-
-  describe '#access_info' do
-    it 'returns a hash with link count, image count, and last accessed time' do
-      analyzer = PageAnalyzer.new(sample_url)
-      analyzer.load
-
-      expect(analyzer.access_info).to be_a(Hash)
-      expect(analyzer.access_info).to have_key(:links)
-      expect(analyzer.access_info).to have_key(:images)
-      expect(analyzer.access_info).to have_key(:last_accessed)
+      expect(analyzer.send(:last_accessed_time)).to be_a(Time)
     end
   end
 end
