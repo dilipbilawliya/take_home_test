@@ -1,28 +1,22 @@
 #!/usr/bin/env ruby
 # encod
-require './lib/web_page_scraper'
+require './lib/page_scraper'
 
 class Fetch
+  attr_reader :urls, :metadata
 
   def initialize(args)
-    @urls, @metadata_option = parse(args)
+    @metadata = !args.delete('--metadata').nil?
+    @urls = args
   end
 
   def call
-    if @urls.empty?
+    if urls.empty?
       puts 'Usage: ./fetch url1 url2 [...]'
       exit(1)
     end
 
-    fetch = WebPageScraper.new(@urls, @metadata_option)
-    fetch.process_urls
-  end
-  private 
-
-  def parse(args)
-    metadata_option = args.include?('--metadata')
-    urls = args.reject { |arg| arg == '--metadata' }
-    return urls, metadata_option
+    PageScraper.new(urls, metadata).process
   end
 end
 
